@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import Navbar from './components/Navbar';
@@ -8,8 +8,28 @@ import Register from './pages/Register';
 import AdminDashboard from './pages/AdminDashboard';
 import StudentDashboard from './pages/StudentDashboard';
 import ProtectedRoute from './components/ProtectedRoute';
+import api from './services/api';
 
 function App() {
+  // Add debugging for deployment issues
+  useEffect(() => {
+    console.log('App initialized');
+    console.log('Environment:', process.env.NODE_ENV);
+    
+    // Test API connection
+    const testApiConnection = async () => {
+      try {
+        console.log('Testing API connection...');
+        // Just log the configuration without making an actual request
+        console.log('API base URL:', api.defaults.baseURL);
+      } catch (error) {
+        console.error('API connection test failed:', error);
+      }
+    };
+    
+    testApiConnection();
+  }, []);
+
   return (
     <AuthProvider>
       <Router>
