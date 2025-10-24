@@ -14,7 +14,8 @@ app.use(cors({
     'http://localhost:3000',
     'https://teachify-student.vercel.app',
     'https://teachify-student-git-main.vercel.app',
-    /\.vercel\.app$/
+    /\.vercel\.app$/,
+    /\.railway\.app$/
   ],
   credentials: true
 }));
