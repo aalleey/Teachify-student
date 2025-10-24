@@ -1,0 +1,23 @@
+{
+  "name": "teachify-student",
+  "version": "1.0.0",
+  "description": "MERN Stack Student Management System",
+  "main": "server/index.js",
+  "scripts": {
+    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "server": "cd server && npm run dev",
+    "client": "cd client && npm start",
+    "install-server": "cd server && npm install",
+    "install-client": "cd client && npm install",
+    "install-all": "npm run install-server && npm run install-client",
+    "build": "cd client && npm run build",
+    "setup": "node setup.js",
+    "seed": "cd server && npm run seed"
+  },
+  "keywords": ["mern", "student", "management", "education"],
+  "author": "Your Name",
+  "license": "MIT",
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
