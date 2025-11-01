@@ -6,24 +6,30 @@ import LoginForm from '../components/LoginForm';
 
 const Login = () => {
   const navigate = useNavigate();
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated, user, loading } = useAuth();
 
-  // Redirect if already logged in
+  // Redirect if already logged in (this is also handled by PublicRoute, but keeping for safety)
   React.useEffect(() => {
-    if (isAuthenticated) {
+    if (!loading && isAuthenticated) {
       if (user?.role === 'admin') {
-        navigate('/admin/dashboard');
+        navigate('/admin/dashboard', { replace: true });
+      } else if (user?.role === 'student') {
+        navigate('/student/dashboard', { replace: true });
       } else {
-        navigate('/student/dashboard');
+        navigate('/admin/dashboard', { replace: true }); // Default fallback
       }
     }
-  }, [isAuthenticated, user, navigate]);
+  }, [isAuthenticated, user, loading, navigate]);
 
-  const handleLoginSuccess = () => {
-    if (user?.role === 'admin') {
-      navigate('/admin/dashboard');
+  const handleLoginSuccess = (userData) => {
+    // Navigate based on user role from login response
+    const role = userData?.role || user?.role;
+    if (role === 'admin') {
+      navigate('/admin/dashboard', { replace: true });
+    } else if (role === 'student') {
+      navigate('/student/dashboard', { replace: true });
     } else {
-      navigate('/student/dashboard');
+      navigate('/admin/dashboard', { replace: true }); // Default fallback
     }
   };
 

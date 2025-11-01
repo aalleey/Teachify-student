@@ -1,12 +1,24 @@
 import axios from 'axios';
 
-// Set the base URL based on environment
-const baseURL = process.env.NODE_ENV === 'production' 
-  ? 'https://teachify-student-production.up.railway.app/api'
-  : 'http://localhost:5000/api';
+// Determine API base URL
+// When app is served from Express (production build or ngrok), use relative URLs
+// When using React dev server (npm start), use localhost
+let baseURL;
+
+if (process.env.REACT_APP_API_URL) {
+  // Use explicit API URL if set in environment variable
+  baseURL = `${process.env.REACT_APP_API_URL}/api`;
+} else if (process.env.NODE_ENV === 'production') {
+  // Production: Use relative URL since app is served from same server
+  baseURL = '/api';
+} else {
+  // Development: React dev server runs on 3000, API on 5000
+  baseURL = 'http://localhost:5000/api';
+}
 
 console.log('API Base URL:', baseURL);
 console.log('Environment:', process.env.NODE_ENV);
+console.log('Window Origin:', window.location.origin);
 
 const api = axios.create({
   baseURL,
@@ -22,6 +34,10 @@ api.interceptors.request.use(
     const token = localStorage.getItem('token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
+    }
+    // Don't override Content-Type for FormData - let browser set it with boundary
+    if (config.data instanceof FormData) {
+      delete config.headers['Content-Type'];
     }
     return config;
   },
@@ -44,58 +60,56 @@ api.interceptors.response.use(
 
 // Auth API
 export const authAPI = {
-  login: (credentials) => api.post('/api/auth/login', credentials),
-  register: (userData) => api.post('/api/auth/register', userData),
-  getMe: () => api.get('/api/auth/me'),
+  login: (credentials) => api.post('/auth/login', credentials),
+  register: (userData) => api.post('/auth/register', userData),
+  getMe: () => api.get('/auth/me'),
 };
 
 // Syllabus API
 export const syllabusAPI = {
-  getAll: (params) => api.get('/api/syllabus', { params }),
-  getById: (id) => api.get(`/api/syllabus/${id}`),
-  create: (data) => api.post('/api/syllabus', data, {
-    headers: {
-      'Content-Type': 'multipart/form-data',
-    },
-  }),
-  update: (id, data) => api.put(`/api/syllabus/${id}`, data),
-  delete: (id) => api.delete(`/api/syllabus/${id}`),
+  getAll: (params) => api.get('/syllabus', { params }),
+  getById: (id) => api.get(`/syllabus/${id}`),
+  create: (data) => api.post('/syllabus', data),
+  update: (id, data) => api.put(`/syllabus/${id}`, data),
+  delete: (id) => api.delete(`/syllabus/${id}`),
 };
 
 // Notes API
 export const notesAPI = {
-  getAll: (params) => api.get('/api/notes', { params }),
-  getById: (id) => api.get(`/api/notes/${id}`),
-  create: (data) => api.post('/api/notes', data),
-  update: (id, data) => api.put(`/api/notes/${id}`, data),
-  delete: (id) => api.delete(`/api/notes/${id}`),
+  getAll: (params) => api.get('/notes', { params }),
+  getById: (id) => api.get(`/notes/${id}`),
+  create: (data) => api.post('/notes', data),
+  update: (id, data) => api.put(`/notes/${id}`, data),
+  delete: (id) => api.delete(`/notes/${id}`),
 };
 
 // Announcements API
 export const announcementsAPI = {
-  getAll: () => api.get('/api/announcements'),
-  getById: (id) => api.get(`/api/announcements/${id}`),
-  create: (data) => api.post('/api/announcements', data),
-  update: (id, data) => api.put(`/api/announcements/${id}`, data),
-  delete: (id) => api.delete(`/api/announcements/${id}`),
+  getAll: () => api.get('/announcements'),
+  getById: (id) => api.get(`/announcements/${id}`),
+  create: (data) => api.post('/announcements', data),
+  update: (id, data) => api.put(`/announcements/${id}`, data),
+  delete: (id) => api.delete(`/announcements/${id}`),
 };
 
 // Calendar API
 export const calendarAPI = {
-  getAll: (params) => api.get('/api/calendar', { params }),
-  getById: (id) => api.get(`/api/calendar/${id}`),
-  create: (data) => api.post('/api/calendar', data),
-  update: (id, data) => api.put(`/api/calendar/${id}`, data),
-  delete: (id) => api.delete(`/api/calendar/${id}`),
+  getAll: (params) => api.get('/calendar', { params }),
+  getById: (id) => api.get(`/calendar/${id}`),
+  create: (data) => api.post('/calendar', data),
+  update: (id, data) => api.put(`/calendar/${id}`, data),
+  delete: (id) => api.delete(`/calendar/${id}`),
 };
 
 // Faculty API
 export const facultyAPI = {
-  getAll: (params) => api.get('/api/faculty', { params }),
-  getById: (id) => api.get(`/api/faculty/${id}`),
-  create: (data) => api.post('/api/faculty', data),
-  update: (id, data) => api.put(`/api/faculty/${id}`, data),
-  delete: (id) => api.delete(`/api/faculty/${id}`),
+  getAll: (params) => api.get('/faculty', { params }),
+  getById: (id) => api.get(`/faculty/${id}`),
+  create: (data) => api.post('/faculty', data),
+  update: (id, data) => api.put(`/faculty/${id}`, data),
+  delete: (id) => api.delete(`/faculty/${id}`),
+  // Custom: update only status (requires backend PATCH endpoint)
+  updateStatus: (id, status) => api.patch(`/faculty/${id}/status`, { status }),
 };
 
 export default api;

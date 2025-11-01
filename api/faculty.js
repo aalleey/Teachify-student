@@ -1,12 +1,40 @@
 const express = require('express');
 const { body, validationResult } = require('express-validator');
-const Faculty = require('../models/Faculty');
-const { auth, adminAuth } = require('../middleware/auth');
+const { connectToDatabase } = require('./_utils');
+const Faculty = require('../server/models/Faculty');
+const { auth, adminAuth } = require('../server/middleware/auth');
 
-const router = express.Router();
+const app = express();
+
+// Enable CORS for Vercel
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(200);
+  }
+  next();
+});
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// Initialize database connection
+let dbReady = false;
+connectToDatabase().then(() => {
+  dbReady = true;
+}).catch(err => {
+  console.error('Database connection failed:', err);
+});
 
 // Get all faculty
-router.get('/', async (req, res) => {
+app.get('/', async (req, res) => {
+  if (!dbReady) {
+    await connectToDatabase();
+    dbReady = true;
+  }
+
   try {
     const { department, subject } = req.query;
     let filter = {};
@@ -23,7 +51,12 @@ router.get('/', async (req, res) => {
 });
 
 // Get faculty by ID
-router.get('/:id', async (req, res) => {
+app.get('/:id', async (req, res) => {
+  if (!dbReady) {
+    await connectToDatabase();
+    dbReady = true;
+  }
+
   try {
     const faculty = await Faculty.findById(req.params.id);
     if (!faculty) {
@@ -37,12 +70,17 @@ router.get('/:id', async (req, res) => {
 });
 
 // Create faculty (Admin only)
-router.post('/', auth, adminAuth, [
+app.post('/', auth, adminAuth, [
   body('name').notEmpty().withMessage('Name is required'),
   body('subject').notEmpty().withMessage('Subject is required'),
   body('email').isEmail().withMessage('Valid email is required'),
   body('department').notEmpty().withMessage('Department is required')
 ], async (req, res) => {
+  if (!dbReady) {
+    await connectToDatabase();
+    dbReady = true;
+  }
+
   try {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -76,7 +114,12 @@ router.post('/', auth, adminAuth, [
 });
 
 // Update faculty (Admin only)
-router.put('/:id', auth, adminAuth, async (req, res) => {
+app.put('/:id', auth, adminAuth, async (req, res) => {
+  if (!dbReady) {
+    await connectToDatabase();
+    dbReady = true;
+  }
+
   try {
     const { name, subject, email, department, phone, office, bio, status, photoUrl } = req.body;
     
@@ -98,7 +141,12 @@ router.put('/:id', auth, adminAuth, async (req, res) => {
 });
 
 // Update faculty status (Admin or the faculty member themselves)
-router.patch('/:id/status', auth, async (req, res) => {
+app.patch('/:id/status', auth, async (req, res) => {
+  if (!dbReady) {
+    await connectToDatabase();
+    dbReady = true;
+  }
+
   try {
     const { status } = req.body;
     
@@ -132,7 +180,12 @@ router.patch('/:id/status', auth, async (req, res) => {
 });
 
 // Delete faculty (Admin only)
-router.delete('/:id', auth, adminAuth, async (req, res) => {
+app.delete('/:id', auth, adminAuth, async (req, res) => {
+  if (!dbReady) {
+    await connectToDatabase();
+    dbReady = true;
+  }
+
   try {
     const faculty = await Faculty.findByIdAndDelete(req.params.id);
     if (!faculty) {
@@ -145,4 +198,6 @@ router.delete('/:id', auth, adminAuth, async (req, res) => {
   }
 });
 
-module.exports = router;
+// Vercel serverless function handler
+module.exports = app;
+

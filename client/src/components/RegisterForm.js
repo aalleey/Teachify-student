@@ -46,7 +46,8 @@ const RegisterForm = ({ onSuccess }) => {
     );
     
     if (result.success) {
-      onSuccess && onSuccess();
+      // Pass user data to onSuccess callback for navigation
+      onSuccess && onSuccess(result.user);
     } else {
       setError(result.message);
     }

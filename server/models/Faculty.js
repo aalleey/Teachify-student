@@ -34,6 +34,16 @@ const facultySchema = new mongoose.Schema({
   bio: {
     type: String,
     trim: true
+  },
+  status: {
+    type: String,
+    enum: ['Available', 'Busy', 'On Leave'],
+    default: 'Available',
+    trim: true
+  },
+  photoUrl: {
+    type: String,
+    trim: true
   }
 }, {
   timestamps: true

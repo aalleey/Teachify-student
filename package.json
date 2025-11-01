@@ -4,11 +4,28 @@
   "description": "MERN Stack Student Management System",
   "main": "server/index.js",
   "scripts": {
-    "start": "node server.js"
+    "dev": "concurrently \"npm run server\" \"npm run client\" \"ngrok http 3000\"",
+    "server": "cd server && node index.js",
+    "client": "cd client && npm start",
+    "start": "cd server && npm start",
+    "install-all": "npm install && cd server && npm install && cd ../client && npm install",
+    "build": "cd client && npm install && npm run build",
+    "vercel-build": "npm run build",
+    "seed": "node seed-database.js",
+    "seed-admin": "node seed-admin-simple.js"
   },
   "keywords": ["mern", "student", "management", "education"],
   "author": "Your Name",
   "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "mongoose": "^8.0.3",
+    "bcryptjs": "^2.4.3",
+    "jsonwebtoken": "^9.0.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "express-validator": "^7.0.1"
+  },
   "devDependencies": {
     "concurrently": "^8.2.2"
   }

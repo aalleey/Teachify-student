@@ -48,7 +48,13 @@ const AnnouncementForm = ({
       onSuccess && onSuccess();
       onClose();
     } catch (error) {
-      setError(error.response?.data?.message || 'An error occurred');
+      console.error('Announcement error:', error);
+      const errorMessage = error.response?.data?.message 
+        || error.response?.data?.error
+        || error.response?.data?.errors?.[0]?.msg
+        || error.message
+        || 'An error occurred while saving the announcement';
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }

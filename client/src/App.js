@@ -1,13 +1,15 @@
 import React, { useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import Navbar from './components/Navbar';
 import Home from './pages/Home';
+import Faculty from './pages/Faculty';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import AdminDashboard from './pages/AdminDashboard';
 import StudentDashboard from './pages/StudentDashboard';
 import ProtectedRoute from './components/ProtectedRoute';
+import PublicRoute from './components/PublicRoute';
 import api from './services/api';
 
 function App() {
@@ -33,12 +35,38 @@ function App() {
   return (
     <AuthProvider>
       <Router>
-        <div className="min-h-screen bg-gray-50">
+        <div className="min-h-screen bg-gray-50 dark:bg-[#000000] transition-colors duration-300">
           <Navbar />
           <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
+            {/* Public Routes - Only accessible when NOT logged in */}
+            <Route 
+              path="/" 
+              element={
+                <PublicRoute>
+                  <Home />
+                </PublicRoute>
+              } 
+            />
+            {/* Public route accessible to everyone (guests and authenticated users) */}
+            <Route path="/faculty" element={<Faculty />} />
+            <Route 
+              path="/login" 
+              element={
+                <PublicRoute>
+                  <Login />
+                </PublicRoute>
+              } 
+            />
+            <Route 
+              path="/register" 
+              element={
+                <PublicRoute>
+                  <Register />
+                </PublicRoute>
+              } 
+            />
+            
+            {/* Protected Routes - Require authentication */}
             <Route 
               path="/admin/dashboard" 
               element={
@@ -55,6 +83,9 @@ function App() {
                 </ProtectedRoute>
               } 
             />
+            
+            {/* Catch all - redirect to home (or login if authenticated) */}
+            <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </div>
       </Router>

@@ -88,7 +88,13 @@ const SyllabusUploadForm = ({ onClose, onSuccess }) => {
       onSuccess && onSuccess();
       onClose();
     } catch (error) {
-      setError(error.response?.data?.message || 'Upload failed');
+      console.error('Syllabus upload error:', error);
+      const errorMessage = error.response?.data?.message 
+        || error.response?.data?.error
+        || error.response?.data?.errors?.[0]?.msg
+        || error.message
+        || 'Upload failed. Please check your connection and try again.';
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }

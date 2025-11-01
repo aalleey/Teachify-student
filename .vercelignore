@@ -1,0 +1,32 @@
+# Dependencies
+node_modules/
+server/node_modules/
+client/node_modules/
+
+# Build files (will be built on Vercel)
+client/build/
+
+# Environment files
+.env
+.env.local
+.env.*.local
+server/.env
+server/env.local
+
+# Development files
+server/uploads/
+*.log
+.DS_Store
+
+# Git
+.git/
+.gitignore
+
+# IDE
+.vscode/
+.idea/
+
+# Documentation
+*.md
+!README.md
+

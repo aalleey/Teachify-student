@@ -2,11 +2,12 @@
   "name": "teachify-server",
   "version": "1.0.0",
   "description": "Backend server for Teachify Student Management System",
-  "main": "index.js",
+  "main": "server.js",
   "scripts": {
-    "start": "node index.js",
+    "start": "node server.js",
+    "start:tunnel": "node start-tunnel.js",
     "dev": "nodemon index.js",
-    "seed": "node seed.js"
+    "seed": "node seed.cjs"
   },
   "dependencies": {
     "express": "^4.18.2",

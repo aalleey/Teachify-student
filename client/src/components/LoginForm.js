@@ -26,12 +26,13 @@ const LoginForm = ({ onSuccess }) => {
     const result = await login(formData.email, formData.password);
     
     if (result.success) {
-      onSuccess && onSuccess();
+      // Pass user data to onSuccess callback for navigation
+      onSuccess && onSuccess(result.user);
     } else {
       setError(result.message);
+      setLoading(false);
     }
-    
-    setLoading(false);
+    // Note: Don't set loading to false on success - let the redirect happen
   };
 
   return (

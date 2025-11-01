@@ -15,7 +15,6 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [token, setToken] = useState(localStorage.getItem('token'));
-  const [error, setError] = useState(null);
 
   // Check if user is logged in on app start
   useEffect(() => {
@@ -28,7 +27,6 @@ export const AuthProvider = ({ children }) => {
           console.error('Auth check failed:', error);
           localStorage.removeItem('token');
           setToken(null);
-          setError('Authentication failed. Please log in again.');
         }
       }
       setLoading(false);
@@ -46,7 +44,7 @@ export const AuthProvider = ({ children }) => {
       setToken(newToken);
       setUser(userData);
       
-      return { success: true };
+      return { success: true, user: userData };
     } catch (error) {
       return { 
         success: false, 
@@ -57,7 +55,7 @@ export const AuthProvider = ({ children }) => {
 
   const register = async (name, email, password, role = 'student') => {
     try {
-      const response = await axios.post('/api/auth/register', { 
+      const response = await api.post('/auth/register', { 
         name, email, password, role 
       });
       const { token: newToken, user: userData } = response.data;
@@ -66,7 +64,7 @@ export const AuthProvider = ({ children }) => {
       setToken(newToken);
       setUser(userData);
       
-      return { success: true };
+      return { success: true, user: userData };
     } catch (error) {
       return { 
         success: false, 
@@ -79,7 +77,6 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('token');
     setToken(null);
     setUser(null);
-    delete axios.defaults.headers.common['Authorization'];
   };
 
   const value = {
