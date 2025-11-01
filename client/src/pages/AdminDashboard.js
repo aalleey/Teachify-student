@@ -3,6 +3,7 @@ import Card from '../components/Card';
 import AnnouncementForm from '../components/AnnouncementForm';
 import FacultyForm from '../components/FacultyForm';
 import SyllabusUploadForm from '../components/SyllabusUploadForm';
+import PastPapersSection from '../components/PastPapersSection';
 import { 
   syllabusAPI, 
   notesAPI, 
@@ -148,38 +149,45 @@ const AdminDashboard = () => {
 
       {/* Stats Overview */}
       {activeTab === 'overview' && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
-          <Card>
-            <div className="text-center">
-              <div className="text-3xl font-bold text-primary-600">{stats.syllabus}</div>
-              <div className="text-gray-600">Syllabus</div>
-            </div>
-          </Card>
-          <Card>
-            <div className="text-center">
-              <div className="text-3xl font-bold text-green-600">{stats.notes}</div>
-              <div className="text-gray-600">Notes</div>
-            </div>
-          </Card>
-          <Card>
-            <div className="text-center">
-              <div className="text-3xl font-bold text-yellow-600">{stats.announcements}</div>
-              <div className="text-gray-600">Announcements</div>
-            </div>
-          </Card>
-          <Card>
-            <div className="text-center">
-              <div className="text-3xl font-bold text-purple-600">{stats.events}</div>
-              <div className="text-gray-600">Events</div>
-            </div>
-          </Card>
-          <Card>
-            <div className="text-center">
-              <div className="text-3xl font-bold text-red-600">{stats.faculty}</div>
-              <div className="text-gray-600">Faculty</div>
-            </div>
-          </Card>
-        </div>
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
+            <Card>
+              <div className="text-center">
+                <div className="text-3xl font-bold text-primary-600">{stats.syllabus}</div>
+                <div className="text-gray-600 dark:text-gray-400">Syllabus</div>
+              </div>
+            </Card>
+            <Card>
+              <div className="text-center">
+                <div className="text-3xl font-bold text-green-600">{stats.notes}</div>
+                <div className="text-gray-600 dark:text-gray-400">Notes</div>
+              </div>
+            </Card>
+            <Card>
+              <div className="text-center">
+                <div className="text-3xl font-bold text-yellow-600">{stats.announcements}</div>
+                <div className="text-gray-600 dark:text-gray-400">Announcements</div>
+              </div>
+            </Card>
+            <Card>
+              <div className="text-center">
+                <div className="text-3xl font-bold text-purple-600">{stats.events}</div>
+                <div className="text-gray-600 dark:text-gray-400">Events</div>
+              </div>
+            </Card>
+            <Card>
+              <div className="text-center">
+                <div className="text-3xl font-bold text-red-600">{stats.faculty}</div>
+                <div className="text-gray-600 dark:text-gray-400">Faculty</div>
+              </div>
+            </Card>
+          </div>
+          
+          {/* Past Papers Section */}
+          <div className="mt-8">
+            <PastPapersSection isAdmin={true} />
+          </div>
+        </>
       )}
 
       {/* Tab Navigation */}

@@ -13,13 +13,17 @@ Your app has been deployed to preview:
 
 1. Go to: https://vercel.com/aalleeys-projects/teachify-student/settings/environment-variables
 
-2. Add these environment variables:
+2. Add these environment variables (⚠️ IMPORTANT: MongoDB URI must include database name):
 
 ```
-MONGODB_URI=mongodb+srv://aalleey27:laptop321@techify.zoafzhc.mongodb.net/
+MONGODB_URI=mongodb+srv://aalleey27:laptop321@techify.zoafzhc.mongodb.net/teachify?retryWrites=true&w=majority
 JWT_SECRET=laptop321
 NODE_ENV=production
 ```
+
+**⚠️ CRITICAL**: Your MongoDB URI must end with `/teachify?retryWrites=true&w=majority`
+- ❌ Wrong: `mongodb+srv://...@techify.zoafzhc.mongodb.net/`
+- ✅ Correct: `mongodb+srv://...@techify.zoafzhc.mongodb.net/teachify?retryWrites=true&w=majority`
 
 3. Make sure to apply to **all environments** (Production, Preview, Development)
 

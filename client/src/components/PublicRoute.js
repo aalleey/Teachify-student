@@ -24,6 +24,8 @@ const PublicRoute = ({ children }) => {
     // Redirect based on role
     if (user?.role === 'admin') {
       return <Navigate to="/admin/dashboard" replace />;
+    } else if (user?.role === 'faculty' || user?.role === 'teacher') {
+      return <Navigate to="/teacher/dashboard" replace />;
     } else if (user?.role === 'student') {
       return <Navigate to="/student/dashboard" replace />;
     } else {

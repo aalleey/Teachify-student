@@ -38,6 +38,28 @@ const Home = () => {
         </div>
       </div>
 
+      {/* About Section */}
+      <div id="about" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 scroll-mt-20">
+        <div className="text-center mb-16">
+          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-gray-100 mb-4 transition-colors duration-300">
+            About Teachify
+          </h2>
+          <p className="text-xl text-gray-600 dark:text-gray-400 transition-colors duration-300 max-w-3xl mx-auto">
+            Teachify is a comprehensive platform connecting teachers and students, 
+            providing access to educational resources, past papers, and learning materials 
+            to enhance academic success.
+          </p>
+          <div className="mt-8">
+            <Link
+              to="/about"
+              className="inline-block text-primary-600 dark:text-primary-400 hover:underline font-semibold"
+            >
+              Learn More →
+            </Link>
+          </div>
+        </div>
+      </div>
+
       {/* Features Section */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
         <div className="text-center mb-16">
@@ -136,25 +158,33 @@ const Home = () => {
         </div>
       </div>
 
-      {/* CTA Section */}
-      {!isAuthenticated && (
-        <div className="bg-gray-100 dark:bg-[#0d0d0d] py-20 transition-colors duration-300">
-          <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
-            <h2 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-4 transition-colors duration-300">
-              Ready to get started?
-            </h2>
-            <p className="text-xl text-gray-600 dark:text-gray-400 mb-8 transition-colors duration-300">
-              Join thousands of students already using Teachify
-            </p>
+      {/* Contact Section */}
+      <div id="contact" className="bg-gray-100 dark:bg-[#0d0d0d] py-20 transition-colors duration-300 scroll-mt-20">
+        <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
+          <h2 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-4 transition-colors duration-300">
+            Get in Touch
+          </h2>
+          <p className="text-xl text-gray-600 dark:text-gray-400 mb-8 transition-colors duration-300">
+            Have questions? We'd love to hear from you.
+          </p>
+          <div className="space-x-4">
             <Link
-              to="/register"
-              className="btn-primary text-lg px-8 py-3"
+              to="/contact"
+              className="inline-block bg-primary-600 hover:bg-primary-700 text-white font-semibold px-8 py-3 rounded-lg transition-colors"
             >
-              Create Your Account
+              Contact Us
             </Link>
+            {!isAuthenticated && (
+              <Link
+                to="/register"
+                className="inline-block border-2 border-primary-600 text-primary-600 hover:bg-primary-50 dark:hover:bg-primary-900/20 font-semibold px-8 py-3 rounded-lg transition-colors"
+              >
+                Create Account
+              </Link>
+            )}
           </div>
         </div>
-      )}
+      </div>
     </div>
   );
 };

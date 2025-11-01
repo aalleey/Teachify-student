@@ -112,4 +112,14 @@ export const facultyAPI = {
   updateStatus: (id, status) => api.patch(`/faculty/${id}/status`, { status }),
 };
 
+// Past Papers API
+export const pastPapersAPI = {
+  getAll: (params) => api.get('/pastPapers', { params }),
+  getRecent: (limit) => api.get('/pastPapers/recent', { params: { limit } }),
+  getById: (id) => api.get(`/pastPapers/${id}`),
+  create: (data) => api.post('/pastPapers', data),
+  update: (id, data) => api.put(`/pastPapers/${id}`, data),
+  delete: (id) => api.delete(`/pastPapers/${id}`),
+};
+
 export default api;

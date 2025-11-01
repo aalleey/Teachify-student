@@ -12,7 +12,9 @@
     "build": "cd client && npm install && npm run build",
     "vercel-build": "npm run build",
     "seed": "node seed-database.js",
-    "seed-admin": "node seed-admin-simple.js"
+    "seed-admin": "node seed-admin-simple.js",
+    "seed-admin-prod": "node seed-admin-production.js",
+    "verify-admin": "node verify-admin.js"
   },
   "keywords": ["mern", "student", "management", "education"],
   "author": "Your Name",

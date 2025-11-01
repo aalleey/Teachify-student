@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Card from '../components/Card';
 import SyllabusViewer from '../components/SyllabusViewer';
+import PastPapersSection from '../components/PastPapersSection';
 import { 
   syllabusAPI, 
   notesAPI, 
@@ -94,44 +95,51 @@ const StudentDashboard = () => {
       {/* Tab Content */}
       <div className="space-y-6">
         {activeTab === 'overview' && (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <Card>
-              <div className="text-center">
-                <div className="text-3xl font-bold text-primary-600">{syllabus.length}</div>
-                <div className="text-gray-600">Available Syllabus</div>
-              </div>
-            </Card>
-            <Card>
-              <div className="text-center">
-                <div className="text-3xl font-bold text-green-600">{notes.length}</div>
-                <div className="text-gray-600">Study Notes</div>
-              </div>
-            </Card>
-            <Card>
-              <div className="text-center">
-                <div className="text-3xl font-bold text-yellow-600">{announcements.length}</div>
-                <div className="text-gray-600">Announcements</div>
-              </div>
-            </Card>
-            <Card>
-              <div className="text-center">
-                <div className="text-3xl font-bold text-purple-600">{events.length}</div>
-                <div className="text-gray-600">Upcoming Events</div>
-              </div>
-            </Card>
-            <Card>
-              <div className="text-center">
-                <div className="text-3xl font-bold text-red-600">{faculty.length}</div>
-                <div className="text-gray-600">Faculty Members</div>
-              </div>
-            </Card>
-            <Card>
-              <div className="text-center">
-                <div className="text-3xl font-bold text-indigo-600">4.2</div>
-                <div className="text-gray-600">GPA</div>
-              </div>
-            </Card>
-          </div>
+          <>
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+              <Card>
+                <div className="text-center">
+                  <div className="text-3xl font-bold text-primary-600">{syllabus.length}</div>
+                  <div className="text-gray-600 dark:text-gray-400">Available Syllabus</div>
+                </div>
+              </Card>
+              <Card>
+                <div className="text-center">
+                  <div className="text-3xl font-bold text-green-600">{notes.length}</div>
+                  <div className="text-gray-600 dark:text-gray-400">Study Notes</div>
+                </div>
+              </Card>
+              <Card>
+                <div className="text-center">
+                  <div className="text-3xl font-bold text-yellow-600">{announcements.length}</div>
+                  <div className="text-gray-600 dark:text-gray-400">Announcements</div>
+                </div>
+              </Card>
+              <Card>
+                <div className="text-center">
+                  <div className="text-3xl font-bold text-purple-600">{events.length}</div>
+                  <div className="text-gray-600 dark:text-gray-400">Upcoming Events</div>
+                </div>
+              </Card>
+              <Card>
+                <div className="text-center">
+                  <div className="text-3xl font-bold text-red-600">{faculty.length}</div>
+                  <div className="text-gray-600 dark:text-gray-400">Faculty Members</div>
+                </div>
+              </Card>
+              <Card>
+                <div className="text-center">
+                  <div className="text-3xl font-bold text-indigo-600">4.2</div>
+                  <div className="text-gray-600 dark:text-gray-400">GPA</div>
+                </div>
+              </Card>
+            </div>
+            
+            {/* Past Papers Section */}
+            <div className="mt-8">
+              <PastPapersSection isAdmin={false} />
+            </div>
+          </>
         )}
 
         {activeTab === 'syllabus' && (

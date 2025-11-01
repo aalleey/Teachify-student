@@ -13,6 +13,8 @@ const Login = () => {
     if (!loading && isAuthenticated) {
       if (user?.role === 'admin') {
         navigate('/admin/dashboard', { replace: true });
+      } else if (user?.role === 'faculty' || user?.role === 'teacher') {
+        navigate('/teacher/dashboard', { replace: true });
       } else if (user?.role === 'student') {
         navigate('/student/dashboard', { replace: true });
       } else {
@@ -26,6 +28,8 @@ const Login = () => {
     const role = userData?.role || user?.role;
     if (role === 'admin') {
       navigate('/admin/dashboard', { replace: true });
+    } else if (role === 'faculty' || role === 'teacher') {
+      navigate('/teacher/dashboard', { replace: true });
     } else if (role === 'student') {
       navigate('/student/dashboard', { replace: true });
     } else {

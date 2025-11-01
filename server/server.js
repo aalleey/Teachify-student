@@ -48,6 +48,7 @@ app.use('/api/notes', require('./routes/notes'));
 app.use('/api/announcements', require('./routes/announcements'));
 app.use('/api/calendar', require('./routes/calendar'));
 app.use('/api/faculty', require('./routes/faculty'));
+app.use('/api/pastPapers', require('./routes/pastPapers'));
 
 // Serve static files from React build directory (production build)
 const buildPath = path.join(__dirname, '..', 'client', 'build');

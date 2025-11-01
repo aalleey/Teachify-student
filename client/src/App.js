@@ -3,11 +3,14 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { AuthProvider } from './contexts/AuthContext';
 import Navbar from './components/Navbar';
 import Home from './pages/Home';
+import About from './pages/About';
+import Contact from './pages/Contact';
 import Faculty from './pages/Faculty';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import AdminDashboard from './pages/AdminDashboard';
 import StudentDashboard from './pages/StudentDashboard';
+import TeacherDashboard from './pages/TeacherDashboard';
 import ProtectedRoute from './components/ProtectedRoute';
 import PublicRoute from './components/PublicRoute';
 import api from './services/api';
@@ -47,7 +50,15 @@ function App() {
                 </PublicRoute>
               } 
             />
-            {/* Public route accessible to everyone (guests and authenticated users) */}
+            {/* Public routes accessible to everyone */}
+            <Route 
+              path="/about" 
+              element={<About />} 
+            />
+            <Route 
+              path="/contact" 
+              element={<Contact />} 
+            />
             <Route path="/faculty" element={<Faculty />} />
             <Route 
               path="/login" 
@@ -72,6 +83,14 @@ function App() {
               element={
                 <ProtectedRoute role="admin">
                   <AdminDashboard />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/teacher/dashboard" 
+              element={
+                <ProtectedRoute role="faculty">
+                  <TeacherDashboard />
                 </ProtectedRoute>
               } 
             />
