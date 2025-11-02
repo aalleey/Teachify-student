@@ -7,12 +7,34 @@ const upload = require('../middleware/uploadPastPaper');
 const router = express.Router();
 
 // Get all past papers (with optional filters)
-router.get('/', async (req, res) => {
+// For teachers, automatically filter by their majorSubject if not specified
+router.get('/', async (req, res, next) => {
+  // Make auth optional - if token exists, verify it and attach user
+  try {
+    const token = req.header('Authorization')?.replace('Bearer ', '');
+    if (token) {
+      const jwt = require('jsonwebtoken');
+      const User = require('../models/User');
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      req.user = await User.findById(decoded.id).select('-password');
+    }
+  } catch (error) {
+    // If token is invalid, just continue without user
+    req.user = null;
+  }
+  next();
+}, async (req, res) => {
   try {
     const { subject, year, limit = 50, sort = '-createdAt' } = req.query;
     let filter = {};
     
-    if (subject) filter.subject = subject;
+    // If user is a teacher, filter by their majorSubject unless subject is explicitly provided
+    if (req.user && req.user.role === 'faculty' && req.user.majorSubject && !subject) {
+      filter.subject = req.user.majorSubject;
+    } else if (subject) {
+      filter.subject = subject;
+    }
+    
     if (year) filter.year = parseInt(year);
     
     const papers = await PastPaper.find(filter)
@@ -28,10 +50,33 @@ router.get('/', async (req, res) => {
 });
 
 // Get recent past papers (for Recently Added section)
-router.get('/recent', async (req, res) => {
+// For teachers, automatically filter by their majorSubject
+router.get('/recent', async (req, res, next) => {
+  // Make auth optional - if token exists, verify it and attach user
+  try {
+    const token = req.header('Authorization')?.replace('Bearer ', '');
+    if (token) {
+      const jwt = require('jsonwebtoken');
+      const User = require('../models/User');
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      req.user = await User.findById(decoded.id).select('-password');
+    }
+  } catch (error) {
+    // If token is invalid, just continue without user
+    req.user = null;
+  }
+  next();
+}, async (req, res) => {
   try {
     const limit = parseInt(req.query.limit) || 5;
-    const papers = await PastPaper.find()
+    let filter = {};
+    
+    // If user is a teacher, filter by their majorSubject
+    if (req.user && req.user.role === 'faculty' && req.user.majorSubject) {
+      filter.subject = req.user.majorSubject;
+    }
+    
+    const papers = await PastPaper.find(filter)
       .populate('uploadedBy', 'name email')
       .sort('-createdAt')
       .limit(limit);
@@ -60,14 +105,19 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-// Create past paper (Admin only)
-router.post('/', auth, adminAuth, upload.single('file'), [
+// Create past paper (Admin or Teacher)
+router.post('/', auth, upload.single('file'), [
   body('subject').notEmpty().withMessage('Subject is required'),
   body('title').notEmpty().withMessage('Title is required'),
   body('year').isInt({ min: 2000, max: 2100 }).withMessage('Valid year is required'),
   body('description').optional()
 ], async (req, res) => {
   try {
+    // Allow admin or faculty/teacher
+    if (req.user.role !== 'admin' && req.user.role !== 'faculty') {
+      return res.status(403).json({ message: 'Access denied. Admin or Teacher role required.' });
+    }
+
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
@@ -78,6 +128,15 @@ router.post('/', auth, adminAuth, upload.single('file'), [
     }
 
     const { subject, title, year, description } = req.body;
+    
+    // For teachers, ensure they can only create past papers for their majorSubject
+    if (req.user.role === 'faculty' && req.user.majorSubject) {
+      if (subject !== req.user.majorSubject) {
+        return res.status(403).json({ 
+          message: `You can only upload past papers for your major subject: ${req.user.majorSubject}` 
+        });
+      }
+    }
     
     // Create file URL
     const fileUrl = `/uploads/pastPapers/${req.file.filename}`;

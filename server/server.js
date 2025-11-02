@@ -42,13 +42,100 @@ app.get('/api/health', (req, res) => {
 });
 
 // Import and use routes
-app.use('/api/auth', require('./routes/auth'));
-app.use('/api/syllabus', require('./routes/syllabus'));
-app.use('/api/notes', require('./routes/notes'));
-app.use('/api/announcements', require('./routes/announcements'));
-app.use('/api/calendar', require('./routes/calendar'));
-app.use('/api/faculty', require('./routes/faculty'));
-app.use('/api/pastPapers', require('./routes/pastPapers'));
+console.log('📋 Registering API routes...');
+try {
+  app.use('/api/auth', require('./routes/auth'));
+  console.log('✅ /api/auth registered');
+  app.use('/api/syllabus', require('./routes/syllabus'));
+  console.log('✅ /api/syllabus registered');
+  app.use('/api/notes', require('./routes/notes'));
+  console.log('✅ /api/notes registered');
+  app.use('/api/announcements', require('./routes/announcements'));
+  console.log('✅ /api/announcements registered');
+  app.use('/api/calendar', require('./routes/calendar'));
+  console.log('✅ /api/calendar registered');
+  app.use('/api/faculty', require('./routes/faculty'));
+  console.log('✅ /api/faculty registered');
+  app.use('/api/pastPapers', require('./routes/pastPapers'));
+  console.log('✅ /api/pastPapers registered');
+  app.use('/api/mcqs', require('./routes/mcqs'));
+  console.log('✅ /api/mcqs registered');
+  app.use('/api/quizResults', require('./routes/quizResults'));
+  console.log('✅ /api/quizResults registered');
+  
+  // Register users route with error handling
+  console.log('📝 Attempting to load users route...');
+  try {
+    const usersRouterPath = path.join(__dirname, 'routes', 'users.js');
+    console.log('   Route file path:', usersRouterPath);
+    console.log('   File exists:', fs.existsSync(usersRouterPath));
+    
+    if (!fs.existsSync(usersRouterPath)) {
+      throw new Error(`Users route file not found at ${usersRouterPath}`);
+    }
+    
+    const usersRouter = require('./routes/users');
+    console.log('   Router loaded:', typeof usersRouter);
+    
+    if (!usersRouter || typeof usersRouter !== 'function') {
+      throw new Error('Users router is not a valid Express router');
+    }
+    
+    app.use('/api/users', usersRouter);
+    console.log('✅ /api/users registered successfully');
+    console.log('   Available routes:');
+    console.log('   - GET /api/users (requires auth & admin)');
+    console.log('   - GET /api/users/stats (requires auth & admin)');
+    console.log('   - GET /api/users/:id (requires auth & admin)');
+    console.log('   - PATCH /api/users/:id/approve (requires auth & admin)');
+    console.log('   - PATCH /api/users/:id/block (requires auth & admin)');
+    console.log('   - PATCH /api/users/:id/unblock (requires auth & admin)');
+    console.log('   - PATCH /api/users/:id/reject (requires auth & admin)');
+    console.log('   - DELETE /api/users/:id (requires auth & admin)');
+  } catch (userRouteError) {
+    console.error('❌ CRITICAL: Error registering /api/users route');
+    console.error('   Error message:', userRouteError.message);
+    console.error('   Error code:', userRouteError.code);
+    console.error('   Error name:', userRouteError.name);
+    if (userRouteError.stack) {
+      console.error('   Stack trace:', userRouteError.stack);
+    }
+    // Don't throw - let server start anyway, but log the error clearly
+    console.error('   ⚠️  Server will continue but /api/users endpoints will not work!');
+  }
+  
+  console.log('✅ All API routes registration completed');
+} catch (error) {
+  console.error('❌ Fatal error registering routes:', error);
+  console.error('Error details:', error.message);
+  if (error.stack) {
+    console.error('Stack:', error.stack);
+  }
+}
+
+// Add a route list endpoint for debugging
+app.get('/api/routes', (req, res) => {
+  const routes = [];
+  app._router.stack.forEach((middleware) => {
+    if (middleware.route) {
+      routes.push({
+        path: middleware.route.path,
+        methods: Object.keys(middleware.route.methods)
+      });
+    } else if (middleware.name === 'router') {
+      middleware.handle.stack.forEach((handler) => {
+        if (handler.route) {
+          const basePath = middleware.regexp.source.replace('\\/?', '').replace('(?=\\/|$)', '');
+          routes.push({
+            path: basePath + handler.route.path,
+            methods: Object.keys(handler.route.methods)
+          });
+        }
+      });
+    }
+  });
+  res.json({ routes });
+});
 
 // Serve static files from React build directory (production build)
 const buildPath = path.join(__dirname, '..', 'client', 'build');
@@ -69,7 +156,13 @@ if (fs.existsSync(buildPath)) {
 app.get('*', (req, res) => {
   // Don't serve index.html for API routes
   if (req.path.startsWith('/api/')) {
-    return res.status(404).json({ message: 'API route not found' });
+    console.log('⚠️  API route not found:', req.path);
+    return res.status(404).json({ 
+      message: 'API route not found',
+      path: req.path,
+      method: req.method,
+      hint: 'Check server console for registered routes'
+    });
   }
   
   // Check if build folder exists before trying to serve

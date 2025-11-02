@@ -4,70 +4,39 @@ import { useAuth } from '../contexts/AuthContext';
 import { useDarkMode } from '../hooks/useDarkMode';
 
 const Navbar = () => {
-  const { user, logout, isAuthenticated, isAdmin, isStudent } = useAuth();
+  const { user, logout, isAuthenticated, isAdmin } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [isDarkMode, toggleDarkMode] = useDarkMode();
-  
-  // State for mobile menu toggle
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  
-  // State for current date and time (updates every second)
-  const [currentDateTime, setCurrentDateTime] = useState(new Date());
+  const [isScrolled, setIsScrolled] = useState(false);
 
-  // Update date and time every second
+  // Handle scroll effect
   useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentDateTime(new Date());
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, []);
-
-  // Format date and time
-  const formatDate = (date) => {
-    const options = { 
-      weekday: 'short', 
-      year: 'numeric', 
-      month: 'short', 
-      day: 'numeric' 
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 10);
     };
-    return date.toLocaleDateString('en-US', options);
-  };
-
-  const formatTime = (date) => {
-    return date.toLocaleTimeString('en-US', { 
-      hour: '2-digit', 
-      minute: '2-digit', 
-      second: '2-digit',
-      hour12: true 
-    });
-  };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   // Close mobile menu when route changes
   useEffect(() => {
     setIsMobileMenuOpen(false);
   }, [location.pathname]);
 
-  // Handle logout - clear auth and redirect to home
   const handleLogout = () => {
     logout();
     setIsMobileMenuOpen(false);
-    // Redirect to home page after logout
     navigate('/', { replace: true });
   };
 
-  // Toggle mobile menu
-  const toggleMobileMenu = () => {
-    setIsMobileMenuOpen(!isMobileMenuOpen);
-  };
-
-  // Navigation links - visible when NOT authenticated (guests)
+  // Navigation links for public users
   const publicNavLinks = [
-    { name: 'Home', path: '/' },
-    { name: 'About', path: '/about' },
-    { name: 'Contact', path: '/contact' },
-    { name: 'Teachers', path: '/faculty' },
+    { name: 'Home', path: '/', icon: '🏠' },
+    { name: 'About', path: '/about', icon: '📖' },
+    { name: 'Faculty', path: '/faculty', icon: '👨‍🏫' },
+    { name: 'Contact', path: '/contact', icon: '📧' },
   ];
 
   // Role-based navigation links
@@ -79,20 +48,27 @@ const Navbar = () => {
     if (role === 'admin') {
       return [
         { name: 'Dashboard', path: '/admin/dashboard', icon: '📊' },
-        { name: 'Manage Faculty', path: '/admin/dashboard', icon: '👥' },
-        { name: 'Past Papers', path: '/admin/dashboard?tab=pastPapers', icon: '📄' },
+        { name: 'Users', path: '/admin/dashboard', icon: '👥', tab: 'users' },
+        { name: 'Messages', path: '/admin/dashboard', icon: '💬', tab: 'messages' },
+        { name: 'MCQs', path: '/admin/dashboard', icon: '❓', tab: 'mcqs' },
+        { name: 'Analytics', path: '/admin/dashboard', icon: '📈', tab: 'analytics' },
+        { name: 'Leaderboard', path: '/leaderboard', icon: '🏆' },
       ];
     } else if (role === 'faculty' || role === 'teacher') {
       return [
         { name: 'Dashboard', path: '/teacher/dashboard', icon: '📊' },
-        { name: 'Upload Papers', path: '/teacher/dashboard?tab=upload', icon: '📤' },
-        { name: 'My Uploads', path: '/teacher/dashboard?tab=myPapers', icon: '📁' },
+        { name: 'Messages', path: '/teacher/dashboard', icon: '💬', tab: 'messages' },
+        { name: 'MCQs', path: '/teacher/dashboard', icon: '❓', tab: 'mcqs' },
+        { name: 'Papers', path: '/teacher/dashboard', icon: '📤', tab: 'upload' },
+        { name: 'Leaderboard', path: '/leaderboard', icon: '🏆' },
       ];
     } else if (role === 'student') {
       return [
         { name: 'Dashboard', path: '/student/dashboard', icon: '📊' },
-        { name: 'Past Papers', path: '/student/dashboard?tab=pastPapers', icon: '📄' },
-        { name: 'My Teachers', path: '/student/dashboard?tab=teachers', icon: '👥' },
+        { name: 'Messages', path: '/student/dashboard', icon: '💬', tab: 'messages' },
+        { name: 'Practice', path: '/practice-mcqs', icon: '❓' },
+        { name: 'Results', path: '/student/dashboard', icon: '📈', tab: 'results' },
+        { name: 'Leaderboard', path: '/leaderboard', icon: '🏆' },
       ];
     }
     
@@ -101,21 +77,33 @@ const Navbar = () => {
 
   const navLinks = isAuthenticated ? getRoleBasedLinks() : publicNavLinks;
 
+  // Get dashboard path based on role
+  const getDashboardPath = () => {
+    if (!user) return '/';
+    if (isAdmin) return '/admin/dashboard';
+    if (user.role === 'faculty' || user.role === 'teacher') return '/teacher/dashboard';
+    return '/student/dashboard';
+  };
+
   return (
-    <nav className="bg-white dark:bg-[#000000] shadow-md dark:shadow-black/50 sticky top-0 z-50 border-b border-gray-100 dark:border-[#1a1a1a] transition-colors duration-300 w-full">
-      <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 w-full">
-        <div className="flex justify-between items-center min-h-[64px] h-auto py-2 lg:py-0 lg:h-20">
-          {/* Logo Section - Responsive sizing */}
-          <div className="flex items-center space-x-1.5 sm:space-x-2 md:space-x-3 flex-shrink-0">
-            <Link 
-              to="/" 
-              className="flex items-center space-x-1.5 sm:space-x-2 md:space-x-3 group"
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              {/* Logo Icon - Responsive sizing */}
-              <div className="bg-gradient-to-br from-primary-600 to-primary-800 rounded-lg p-1 sm:p-1.5 md:p-2 group-hover:scale-110 transition-transform duration-300">
+    <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+      isScrolled 
+        ? 'bg-white/95 dark:bg-[#0a0a0a]/95 backdrop-blur-md shadow-lg border-b border-gray-200/50 dark:border-gray-800/50' 
+        : 'bg-white dark:bg-[#0a0a0a] border-b border-gray-200 dark:border-gray-900'
+    }`}>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-16 lg:h-20">
+          {/* Logo */}
+          <Link 
+            to="/" 
+            className="flex items-center space-x-2 group"
+            onClick={() => setIsMobileMenuOpen(false)}
+          >
+            <div className="relative">
+              <div className="absolute inset-0 bg-gradient-to-br from-primary-500 to-primary-700 rounded-xl blur opacity-75 group-hover:opacity-100 transition-opacity"></div>
+              <div className="relative bg-gradient-to-br from-primary-600 to-primary-800 rounded-xl p-2 group-hover:scale-110 transition-transform duration-300">
                 <svg 
-                  className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 text-white" 
+                  className="w-6 h-6 lg:w-7 lg:h-7 text-white" 
                   fill="none" 
                   stroke="currentColor" 
                   viewBox="0 0 24 24"
@@ -123,277 +111,203 @@ const Navbar = () => {
                   <path 
                     strokeLinecap="round" 
                     strokeLinejoin="round" 
-                    strokeWidth={2} 
+                    strokeWidth={2.5} 
                     d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" 
                   />
                 </svg>
               </div>
-              
-              {/* Logo Text - Responsive sizing */}
-              <span className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold bg-gradient-to-r from-primary-600 to-primary-800 bg-clip-text text-transparent whitespace-nowrap">
-                Teachify
-              </span>
-            </Link>
-          </div>
+            </div>
+            <span className="text-xl lg:text-2xl font-bold bg-gradient-to-r from-primary-600 via-primary-700 to-primary-800 bg-clip-text text-transparent">
+              Teachify
+            </span>
+          </Link>
 
-          {/* Desktop Navigation Links - Show on medium screens and up */}
-          <div className="hidden md:flex items-center space-x-1 flex-wrap justify-center flex-1 mx-2 lg:mx-4">
+          {/* Desktop Navigation */}
+          <div className="hidden lg:flex items-center space-x-1 flex-1 justify-center mx-8">
             {navLinks.map((link) => {
-              const isActive = location.pathname === link.path;
+              const isActive = location.pathname === link.path.split('?')[0] || 
+                              (link.tab && location.search.includes(`tab=${link.tab}`));
               return (
                 <Link
                   key={link.name}
-                  to={link.path}
-                  className={`relative px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 group ${
+                  to={link.path + (link.tab ? `?tab=${link.tab}` : '')}
+                  className={`relative px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 group ${
                     isActive
-                      ? 'text-primary-600 dark:text-primary-400 bg-primary-50 dark:bg-[#0d0d0d]'
-                      : 'text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-50 dark:hover:bg-[#1a1a1a]'
+                      ? 'text-primary-600 dark:text-primary-400'
+                      : 'text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400'
                   }`}
                 >
-                  {link.name}
-                  {/* Active indicator underline */}
+                  <span className="flex items-center gap-2">
+                    <span className="text-base">{link.icon}</span>
+                    <span>{link.name}</span>
+                  </span>
                   {isActive && (
-                    <span className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-primary-600 dark:bg-primary-400 rounded-full"></span>
+                    <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-primary-500 to-primary-600 rounded-full"></span>
                   )}
-                  {/* Hover underline effect */}
-                  <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-primary-600 dark:bg-primary-400 transition-all duration-300 group-hover:w-full"></span>
                 </Link>
               );
             })}
           </div>
 
-          {/* Right Section: Date/Time, Dark Mode Toggle & Auth Actions */}
-          <div className="flex items-center space-x-2 sm:space-x-3 md:space-x-4 flex-shrink-0">
-            {/* Dark Mode Toggle - Always visible */}
+          {/* Right Section */}
+          <div className="flex items-center space-x-3 lg:space-x-4">
+            {/* Dark Mode Toggle */}
             <button
               onClick={toggleDarkMode}
-              className="p-1.5 sm:p-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-[#1a1a1a] transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 dark:focus:ring-primary-400 touch-manipulation"
+              className="p-2 rounded-xl bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 transition-all duration-200 hover:scale-110"
               aria-label="Toggle dark mode"
             >
               {isDarkMode ? (
-                <svg className="w-4 h-4 sm:w-5 sm:h-5 transition-all duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
                 </svg>
               ) : (
-                <svg className="w-4 h-4 sm:w-5 sm:h-5 transition-all duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
                 </svg>
               )}
             </button>
 
-            {/* Date and Time Display - Responsive: Hide time on xs, show on sm+ */}
-            <div className="hidden sm:flex flex-col items-end text-right">
-              <div className="text-xs sm:text-xs md:text-sm font-semibold text-gray-900 dark:text-gray-100 whitespace-nowrap">
-                {formatTime(currentDateTime)}
-              </div>
-              <div className="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap hidden md:block">
-                {formatDate(currentDateTime)}
-              </div>
-            </div>
-
-            {/* Auth Section - Desktop: Show on xl screens, Mobile: Show in menu */}
+            {/* Authenticated User Section */}
             {isAuthenticated ? (
-              <div className="hidden xl:flex items-center space-x-2 xl:space-x-3">
-                {/* User greeting - Responsive text */}
-                <div className="flex items-center space-x-1.5 xl:space-x-2">
-                  <span className="text-xs xl:text-sm text-gray-700 dark:text-gray-300 font-medium truncate max-w-[100px] xl:max-w-none">
-                    {user?.name?.split(' ')[0] || 'User'}
-                  </span>
-                  {user?.role && (
-                    <span className={`px-1.5 xl:px-2 py-0.5 xl:py-1 text-[10px] xl:text-xs font-semibold rounded-full transition-colors duration-200 whitespace-nowrap ${
-                      user.role === 'admin' 
-                        ? 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400' 
-                        : user.role === 'student'
-                        ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400'
-                        : 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400'
-                    }`}>
-                      {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
+              <div className="hidden lg:flex items-center space-x-3">
+                {/* User Profile */}
+                <div className="flex items-center space-x-2 px-3 py-1.5 rounded-lg bg-gray-100 dark:bg-gray-800">
+                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center text-white font-semibold text-sm">
+                    {user?.name?.charAt(0)?.toUpperCase() || 'U'}
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-xs font-semibold text-gray-900 dark:text-gray-100">
+                      {user?.name?.split(' ')[0] || 'User'}
                     </span>
-                  )}
+                    <span className={`text-[10px] font-medium ${
+                      user?.role === 'admin' 
+                        ? 'text-purple-600 dark:text-purple-400'
+                        : user?.role === 'student'
+                        ? 'text-green-600 dark:text-green-400'
+                        : 'text-blue-600 dark:text-blue-400'
+                    }`}>
+                      {user?.role?.charAt(0).toUpperCase() + user?.role?.slice(1) || 'User'}
+                    </span>
+                  </div>
                 </div>
 
-                {/* Dashboard Link - Responsive */}
-                {(isAdmin || isStudent || user?.role === 'faculty' || user?.role === 'teacher') && (
-                  <Link
-                    to={
-                      isAdmin 
-                        ? '/admin/dashboard' 
-                        : (user?.role === 'faculty' || user?.role === 'teacher')
-                        ? '/teacher/dashboard'
-                        : '/student/dashboard'
-                    }
-                    className="px-3 xl:px-4 py-1.5 xl:py-2 bg-primary-600 dark:bg-primary-500 text-white text-xs xl:text-sm font-medium rounded-lg hover:bg-primary-700 dark:hover:bg-primary-600 transition-colors duration-200 whitespace-nowrap"
-                  >
-                    Dashboard
-                  </Link>
-                )}
+                {/* Dashboard Button */}
+                <Link
+                  to={getDashboardPath()}
+                  className="px-4 py-2 bg-gradient-to-r from-primary-600 to-primary-700 text-white text-sm font-semibold rounded-lg hover:from-primary-700 hover:to-primary-800 transition-all duration-200 shadow-md hover:shadow-lg"
+                >
+                  Dashboard
+                </Link>
 
-                {/* Logout Button - Responsive */}
+                {/* Logout Button */}
                 <button
                   onClick={handleLogout}
-                  className="px-3 xl:px-4 py-1.5 xl:py-2 bg-red-600 text-white text-xs xl:text-sm font-medium rounded-lg hover:bg-red-700 transition-colors duration-200 flex items-center space-x-1 whitespace-nowrap"
+                  className="px-4 py-2 bg-red-500 text-white text-sm font-semibold rounded-lg hover:bg-red-600 transition-all duration-200 shadow-md hover:shadow-lg flex items-center gap-2"
                 >
-                  <svg className="w-3.5 h-3.5 xl:w-4 xl:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                   </svg>
-                  <span className="hidden xl:inline">Logout</span>
+                  Logout
                 </button>
               </div>
             ) : (
-              <div className="hidden xl:flex items-center space-x-2">
+              <div className="hidden lg:flex items-center space-x-3">
                 <Link
                   to="/login"
-                  className="px-3 xl:px-4 py-1.5 xl:py-2 text-gray-700 dark:text-gray-300 text-xs xl:text-sm font-medium rounded-lg hover:bg-gray-100 dark:hover:bg-[#1a1a1a] transition-colors duration-200 whitespace-nowrap"
+                  className="px-4 py-2 text-gray-700 dark:text-gray-300 text-sm font-medium rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-200"
                 >
                   Login
                 </Link>
                 <Link
                   to="/register"
-                  className="px-3 xl:px-4 py-1.5 xl:py-2 bg-primary-600 dark:bg-primary-500 text-white text-xs xl:text-sm font-medium rounded-lg hover:bg-primary-700 dark:hover:bg-primary-600 transition-colors duration-200 whitespace-nowrap"
+                  className="px-4 py-2 bg-gradient-to-r from-primary-600 to-primary-700 text-white text-sm font-semibold rounded-lg hover:from-primary-700 hover:to-primary-800 transition-all duration-200 shadow-md hover:shadow-lg"
                 >
-                  Register
+                  Get Started
                 </Link>
               </div>
             )}
 
-            {/* Mobile Menu Toggle Button - Always visible on mobile/tablet */}
+            {/* Mobile Menu Toggle */}
             <button
-              onClick={toggleMobileMenu}
-              className="xl:hidden p-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-[#1a1a1a] transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 dark:focus:ring-primary-400 touch-manipulation"
-              aria-label="Toggle mobile menu"
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className="lg:hidden p-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+              aria-label="Toggle menu"
             >
-              {/* Hamburger Icon - Animates to X when open */}
               <div className="w-6 h-6 relative">
-                <span
-                  className={`absolute top-0 left-0 w-6 h-0.5 bg-current transform transition-all duration-300 ${
-                    isMobileMenuOpen ? 'rotate-45 translate-y-2.5' : ''
-                  }`}
-                ></span>
-                <span
-                  className={`absolute top-2.5 left-0 w-6 h-0.5 bg-current transition-all duration-300 ${
-                    isMobileMenuOpen ? 'opacity-0' : ''
-                  }`}
-                ></span>
-                <span
-                  className={`absolute top-5 left-0 w-6 h-0.5 bg-current transform transition-all duration-300 ${
-                    isMobileMenuOpen ? '-rotate-45 -translate-y-2.5' : ''
-                  }`}
-                ></span>
+                <span className={`absolute top-0 left-0 w-6 h-0.5 bg-current transform transition-all duration-300 ${isMobileMenuOpen ? 'rotate-45 translate-y-2.5' : ''}`}></span>
+                <span className={`absolute top-2.5 left-0 w-6 h-0.5 bg-current transition-all duration-300 ${isMobileMenuOpen ? 'opacity-0' : ''}`}></span>
+                <span className={`absolute top-5 left-0 w-6 h-0.5 bg-current transform transition-all duration-300 ${isMobileMenuOpen ? '-rotate-45 -translate-y-2.5' : ''}`}></span>
               </div>
             </button>
           </div>
         </div>
 
-        {/* Mobile Menu - Slides down when open, scrollable if needed */}
+        {/* Mobile Menu */}
         <div
-          className={`xl:hidden overflow-hidden transition-all duration-300 ease-in-out ${
-            isMobileMenuOpen ? 'max-h-[90vh] opacity-100' : 'max-h-0 opacity-0'
+          className={`lg:hidden overflow-hidden transition-all duration-300 ease-in-out ${
+            isMobileMenuOpen ? 'max-h-screen opacity-100' : 'max-h-0 opacity-0'
           }`}
         >
-          <div className="py-3 sm:py-4 border-t border-gray-200 dark:border-[#1a1a1a] overflow-y-auto max-h-[90vh]">
-            {/* Mobile Dark Mode Toggle */}
-            <div className="mb-3 sm:mb-4 pb-3 sm:pb-4 border-b border-gray-200 dark:border-[#1a1a1a]">
-              <button
-                onClick={toggleDarkMode}
-                className="w-full flex items-center justify-center gap-2 px-4 py-2.5 sm:py-3 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-[#1a1a1a] transition-colors duration-200 touch-manipulation"
-              >
-                {isDarkMode ? (
-                  <>
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
-                    </svg>
-                    <span>Light Mode</span>
-                  </>
-                ) : (
-                  <>
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-                    </svg>
-                    <span>Dark Mode</span>
-                  </>
-                )}
-              </button>
-            </div>
-            
-            {/* Mobile Date/Time Display */}
-            <div className="mb-3 sm:mb-4 pb-3 sm:pb-4 border-b border-gray-200 dark:border-[#1a1a1a] text-center">
-              <div className="text-base sm:text-lg font-semibold text-gray-900 dark:text-gray-100">
-                {formatTime(currentDateTime)}
-              </div>
-              <div className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-0.5">
-                {formatDate(currentDateTime)}
-              </div>
-            </div>
-
-            {/* Mobile Navigation Links - Scrollable if needed */}
-            <div className="space-y-1 mb-3 sm:mb-4">
-              {navLinks.map((link) => {
-                const isActive = location.pathname === link.path.split('?')[0];
-                return (
-                  <Link
-                    key={link.name}
-                    to={link.path}
-                    onClick={() => setIsMobileMenuOpen(false)}
-                    className={`block px-4 py-2.5 sm:py-3 rounded-lg text-sm sm:text-base font-medium transition-colors duration-200 touch-manipulation ${
-                      isActive
-                        ? 'bg-primary-50 dark:bg-[#0d0d0d] text-primary-600 dark:text-primary-400'
-                        : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#1a1a1a] hover:text-primary-600 dark:hover:text-primary-400'
-                    }`}
-                  >
-                    <span className="mr-2">{link.icon || ''}</span>
-                    {link.name}
-                  </Link>
-                );
-              })}
-            </div>
+          <div className="py-4 border-t border-gray-200 dark:border-gray-800 space-y-2">
+            {/* Mobile Navigation Links */}
+            {navLinks.map((link) => {
+              const isActive = location.pathname === link.path.split('?')[0] || 
+                              (link.tab && location.search.includes(`tab=${link.tab}`));
+              return (
+                <Link
+                  key={link.name}
+                  to={link.path + (link.tab ? `?tab=${link.tab}` : '')}
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className={`flex items-center gap-3 px-4 py-3 rounded-lg text-base font-medium transition-all duration-200 ${
+                    isActive
+                      ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400'
+                      : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
+                  }`}
+                >
+                  <span className="text-xl">{link.icon}</span>
+                  <span>{link.name}</span>
+                </Link>
+              );
+            })}
 
             {/* Mobile Auth Section */}
-            <div className="mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-gray-200 dark:border-[#1a1a1a] space-y-2">
+            <div className="pt-4 border-t border-gray-200 dark:border-gray-800 space-y-2">
               {isAuthenticated ? (
                 <>
-                  {/* User Info - Responsive */}
-                  <div className="px-3 sm:px-4 py-2 bg-gray-50 dark:bg-[#0d0d0d] rounded-lg">
-                    <div className="text-sm sm:text-base font-medium text-gray-900 dark:text-gray-100 truncate">
-                      {user?.name}
-                    </div>
-                    {user?.role && (
-                      <div className="flex items-center gap-2 mt-1">
-                        <span className={`px-2 py-0.5 text-xs font-semibold rounded-full ${
-                          user.role === 'admin' 
-                            ? 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400' 
-                            : user.role === 'student'
-                            ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400'
-                            : 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400'
-                        }`}>
-                          {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
-                        </span>
+                  <div className="px-4 py-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center text-white font-semibold">
+                        {user?.name?.charAt(0)?.toUpperCase() || 'U'}
                       </div>
-                    )}
+                      <div>
+                        <div className="font-semibold text-gray-900 dark:text-gray-100">
+                          {user?.name}
+                        </div>
+                        <div className={`text-xs font-medium ${
+                          user?.role === 'admin' 
+                            ? 'text-purple-600 dark:text-purple-400'
+                            : user?.role === 'student'
+                            ? 'text-green-600 dark:text-green-400'
+                            : 'text-blue-600 dark:text-blue-400'
+                        }`}>
+                          {user?.role?.charAt(0).toUpperCase() + user?.role?.slice(1) || 'User'}
+                        </div>
+                      </div>
+                    </div>
                   </div>
-
-                  {/* Dashboard Link - Touch-friendly */}
-                  {(isAdmin || isStudent || user?.role === 'faculty' || user?.role === 'teacher') && (
-                    <Link
-                      to={
-                        isAdmin 
-                          ? '/admin/dashboard' 
-                          : (user?.role === 'faculty' || user?.role === 'teacher')
-                          ? '/teacher/dashboard'
-                          : '/student/dashboard'
-                      }
-                      onClick={() => setIsMobileMenuOpen(false)}
-                      className="block px-4 py-3 bg-primary-600 dark:bg-primary-500 text-white text-center rounded-lg font-medium hover:bg-primary-700 dark:hover:bg-primary-600 transition-colors duration-200 touch-manipulation text-sm sm:text-base"
-                    >
-                      Dashboard
-                    </Link>
-                  )}
-
-                  {/* Logout Button - Touch-friendly */}
+                  <Link
+                    to={getDashboardPath()}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="block px-4 py-3 bg-gradient-to-r from-primary-600 to-primary-700 text-white text-center rounded-lg font-semibold hover:from-primary-700 hover:to-primary-800 transition-all duration-200"
+                  >
+                    Go to Dashboard
+                  </Link>
                   <button
                     onClick={handleLogout}
-                    className="w-full px-4 py-3 bg-red-600 text-white text-center rounded-lg font-medium hover:bg-red-700 transition-colors duration-200 touch-manipulation text-sm sm:text-base flex items-center justify-center gap-2"
+                    className="w-full px-4 py-3 bg-red-500 text-white text-center rounded-lg font-semibold hover:bg-red-600 transition-all duration-200 flex items-center justify-center gap-2"
                   >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                     </svg>
                     Logout
@@ -404,16 +318,16 @@ const Navbar = () => {
                   <Link
                     to="/login"
                     onClick={() => setIsMobileMenuOpen(false)}
-                    className="block px-4 py-3 text-gray-700 dark:text-gray-300 text-center rounded-lg font-medium hover:bg-gray-50 dark:hover:bg-[#1a1a1a] transition-colors duration-200 touch-manipulation text-sm sm:text-base"
+                    className="block px-4 py-3 text-gray-700 dark:text-gray-300 text-center rounded-lg font-medium hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-200"
                   >
                     Login
                   </Link>
                   <Link
                     to="/register"
                     onClick={() => setIsMobileMenuOpen(false)}
-                    className="block px-4 py-3 bg-primary-600 dark:bg-primary-500 text-white text-center rounded-lg font-medium hover:bg-primary-700 dark:hover:bg-primary-600 transition-colors duration-200 touch-manipulation text-sm sm:text-base"
+                    className="block px-4 py-3 bg-gradient-to-r from-primary-600 to-primary-700 text-white text-center rounded-lg font-semibold hover:from-primary-700 hover:to-primary-800 transition-all duration-200"
                   >
-                    Register
+                    Get Started
                   </Link>
                 </>
               )}

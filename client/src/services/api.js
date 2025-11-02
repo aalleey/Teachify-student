@@ -122,4 +122,67 @@ export const pastPapersAPI = {
   delete: (id) => api.delete(`/pastPapers/${id}`),
 };
 
+// MCQs API
+export const mcqsAPI = {
+  getAll: (params) => {
+    console.log('MCQs getAll called with params:', params);
+    return api.get('/mcqs', { params });
+  },
+  getPractice: (params) => {
+    console.log('MCQs getPractice called with params:', params);
+    return api.get('/mcqs/practice', { params });
+  },
+  getById: (id) => api.get(`/mcqs/${id}`),
+  create: (data) => {
+    console.log('MCQs create called with data:', data);
+    console.log('Full URL will be:', api.defaults.baseURL + '/mcqs');
+    return api.post('/mcqs', data).catch(error => {
+      console.error('MCQ create error details:', {
+        status: error.response?.status,
+        statusText: error.response?.statusText,
+        data: error.response?.data,
+        url: error.config?.url,
+        baseURL: error.config?.baseURL,
+        fullURL: error.config?.baseURL + error.config?.url
+      });
+      throw error;
+    });
+  },
+  bulkCreate: (mcqs) => api.post('/mcqs/bulk', { mcqs }),
+  update: (id, data) => api.put(`/mcqs/${id}`, data),
+  delete: (id) => api.delete(`/mcqs/${id}`),
+  getMyStats: () => api.get('/mcqs/stats/my'),
+};
+
+// Quiz Results API
+export const quizResultsAPI = {
+  submit: (data) => api.post('/quizResults/submit', data),
+  getMyResults: (params) => api.get('/quizResults/my-results', { params }),
+  getLeaderboard: (params) => api.get('/quizResults/leaderboard', { params }),
+  getMyRank: (params) => api.get('/quizResults/my-rank', { params }),
+  getAnalytics: () => api.get('/quizResults/analytics'),
+  getById: (id) => api.get(`/quizResults/${id}`),
+};
+
+// Users API (Admin only)
+export const usersAPI = {
+  getAll: (params) => api.get('/users', { params }),
+  getById: (id) => api.get(`/users/${id}`),
+  getStats: () => api.get('/users/stats'),
+  approve: (id) => api.patch(`/users/${id}/approve`),
+  block: (id) => api.patch(`/users/${id}/block`),
+  unblock: (id) => api.patch(`/users/${id}/unblock`),
+  reject: (id) => api.patch(`/users/${id}/reject`),
+  delete: (id) => api.delete(`/users/${id}`),
+};
+
+// Messages API
+export const messagesAPI = {
+  getConversations: () => api.get('/messages/conversations'),
+  getConversation: (otherUserId) => api.get(`/messages/conversation/${otherUserId}`),
+  getTeachers: () => api.get('/messages/teachers'),
+  sendMessage: (data) => api.post('/messages', data),
+  getSummary: () => api.get('/messages/summary'),
+};
+
 export default api;

@@ -23,7 +23,52 @@ const userSchema = new mongoose.Schema({
     type: String,
     enum: ['admin', 'student', 'faculty'],
     default: 'student'
-  }
+  },
+  majorSubject: {
+    type: String,
+    trim: true,
+    required: function() {
+      return this.role === 'faculty';
+    }
+  },
+  isApproved: {
+    type: Boolean,
+    default: function() {
+      // Admins are auto-approved, others need approval
+      return this.role === 'admin';
+    }
+  },
+  isBlocked: {
+    type: Boolean,
+    default: false
+  },
+  // Quiz performance fields (for students)
+  averageScore: {
+    type: Number,
+    default: 0,
+    min: 0,
+    max: 100
+  },
+  totalAttempts: {
+    type: Number,
+    default: 0,
+    min: 0
+  },
+  progressHistory: [{
+    subject: {
+      type: String,
+      trim: true
+    },
+    score: {
+      type: Number,
+      min: 0,
+      max: 100
+    },
+    date: {
+      type: Date,
+      default: Date.now
+    }
+  }]
 }, {
   timestamps: true
 });

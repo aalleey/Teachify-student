@@ -28,6 +28,10 @@ const announcementsRoutes = require('./announcements');
 const notesRoutes = require('./notes');
 const calendarRoutes = require('./calendar');
 const pastPapersRoutes = require('./pastPapers');
+const mcqsRoutes = require('./mcqs');
+const quizResultsRoutes = require('./quizResults');
+const usersRoutes = require('./users');
+const messagesRoutes = require('./messages');
 
 // Mount routes with /api prefix (Vercel keeps full path in request)
 app.use('/api/auth', authRoutes);
@@ -37,6 +41,10 @@ app.use('/api/announcements', announcementsRoutes);
 app.use('/api/notes', notesRoutes);
 app.use('/api/calendar', calendarRoutes);
 app.use('/api/pastPapers', pastPapersRoutes);
+app.use('/api/mcqs', mcqsRoutes);
+app.use('/api/quizResults', quizResultsRoutes);
+app.use('/api/users', usersRoutes);
+app.use('/api/messages', messagesRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {
@@ -52,7 +60,7 @@ app.get('/api', (req, res) => {
   res.json({ 
     status: 'OK', 
     message: 'Teachify API is running',
-    endpoints: ['/api/health', '/api/auth', '/api/faculty', '/api/syllabus', '/api/announcements', '/api/notes', '/api/calendar', '/api/pastPapers']
+    endpoints: ['/api/health', '/api/auth', '/api/faculty', '/api/syllabus', '/api/announcements', '/api/notes', '/api/calendar', '/api/pastPapers', '/api/mcqs', '/api/quizResults', '/api/users', '/api/messages']
   });
 });
 

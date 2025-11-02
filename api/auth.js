@@ -143,12 +143,29 @@ app.get('/me', auth, async (req, res) => {
   }
 
   try {
+    // Explicitly fetch fresh user data from database to ensure we have latest approval status
+    const freshUser = await User.findById(req.user._id).select('-password');
+    
+    if (!freshUser) {
+      return res.status(401).json({ message: 'User not found' });
+    }
+
+    // Set no-cache headers to prevent browser/proxy caching
+    res.set({
+      'Cache-Control': 'no-cache, no-store, must-revalidate',
+      'Pragma': 'no-cache',
+      'Expires': '0'
+    });
+
     res.json({
       user: {
-        id: req.user._id,
-        name: req.user.name,
-        email: req.user.email,
-        role: req.user.role
+        id: freshUser._id,
+        name: freshUser.name,
+        email: freshUser.email,
+        role: freshUser.role,
+        isApproved: freshUser.isApproved,
+        isBlocked: freshUser.isBlocked,
+        majorSubject: freshUser.majorSubject || undefined
       }
     });
   } catch (error) {

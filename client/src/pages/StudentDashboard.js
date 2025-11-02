@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import Card from '../components/Card';
 import SyllabusViewer from '../components/SyllabusViewer';
 import PastPapersSection from '../components/PastPapersSection';
+import QuizResultsHistory from '../components/QuizResultsHistory';
+import Messages from '../components/Messages';
 import { 
   syllabusAPI, 
   notesAPI, 
@@ -48,11 +50,13 @@ const StudentDashboard = () => {
 
   const tabs = [
     { id: 'overview', name: 'Overview', icon: '🏠' },
+    { id: 'results', name: 'Results', icon: '📊' },
     { id: 'syllabus', name: 'Syllabus', icon: '📚' },
     { id: 'notes', name: 'Notes', icon: '📝' },
     { id: 'announcements', name: 'Announcements', icon: '📢' },
     { id: 'calendar', name: 'Calendar', icon: '📅' },
-    { id: 'faculty', name: 'Faculty', icon: '👥' }
+    { id: 'faculty', name: 'Faculty', icon: '👥' },
+    { id: 'messages', name: 'Messages', icon: '💬' }
   ];
 
   if (loading) {
@@ -278,6 +282,14 @@ const StudentDashboard = () => {
               </div>
             )}
           </Card>
+        )}
+
+        {activeTab === 'results' && (
+          <QuizResultsHistory />
+        )}
+
+        {activeTab === 'messages' && (
+          <Messages userRole="student" />
         )}
       </div>
     </div>

@@ -7,12 +7,29 @@ const RegisterForm = ({ onSuccess }) => {
     email: '',
     password: '',
     confirmPassword: '',
-    role: 'student'
+    role: '', // Start with empty role - user must select
+    majorSubject: '' // For teachers
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
   const { register } = useAuth();
+
+  // Common subjects for teachers
+  const subjects = [
+    'Physics',
+    'Chemistry',
+    'Mathematics',
+    'Biology',
+    'Computer Science',
+    'English',
+    'History',
+    'Geography',
+    'Economics',
+    'Business Studies',
+    'Accounting',
+    'Other'
+  ];
 
   const handleChange = (e) => {
     setFormData({
@@ -25,6 +42,20 @@ const RegisterForm = ({ onSuccess }) => {
     e.preventDefault();
     setLoading(true);
     setError('');
+
+    // Validate role selection
+    if (!formData.role) {
+      setError('Please select whether you are signing up as a Teacher or Student');
+      setLoading(false);
+      return;
+    }
+
+    // Validate majorSubject for teachers
+    if (formData.role === 'faculty' && !formData.majorSubject) {
+      setError('Please select your major subject');
+      setLoading(false);
+      return;
+    }
 
     if (formData.password !== formData.confirmPassword) {
       setError('Passwords do not match');
@@ -42,10 +73,15 @@ const RegisterForm = ({ onSuccess }) => {
       formData.name,
       formData.email,
       formData.password,
-      formData.role
+      formData.role,
+      formData.majorSubject
     );
     
     if (result.success) {
+      // Show success message about approval
+      if (result.user.role !== 'admin' && !result.user.isApproved) {
+        alert('Registration successful! Your account is pending admin approval. You will be notified once approved.');
+      }
       // Pass user data to onSuccess callback for navigation
       onSuccess && onSuccess(result.user);
     } else {
@@ -97,19 +133,47 @@ const RegisterForm = ({ onSuccess }) => {
 
       <div>
         <label htmlFor="role" className="block text-sm font-medium text-gray-700">
-          Role
+          Sign up as
         </label>
         <select
           id="role"
           name="role"
           value={formData.role}
           onChange={handleChange}
+          required
           className="input-field mt-1"
         >
+          <option value="">Select your role...</option>
           <option value="student">Student</option>
-          <option value="faculty">Faculty</option>
+          <option value="faculty">Teacher</option>
         </select>
       </div>
+
+      {formData.role === 'faculty' && (
+        <div>
+          <label htmlFor="majorSubject" className="block text-sm font-medium text-gray-700">
+            Major Subject <span className="text-red-500">*</span>
+          </label>
+          <select
+            id="majorSubject"
+            name="majorSubject"
+            value={formData.majorSubject}
+            onChange={handleChange}
+            required
+            className="input-field mt-1"
+          >
+            <option value="">Select your major subject...</option>
+            {subjects.map((subject) => (
+              <option key={subject} value={subject}>
+                {subject}
+              </option>
+            ))}
+          </select>
+          <p className="mt-1 text-sm text-gray-500">
+            You will only see MCQs, syllabus, and past papers related to this subject
+          </p>
+        </div>
+      )}
 
       <div>
         <label htmlFor="password" className="block text-sm font-medium text-gray-700">

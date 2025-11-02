@@ -15,6 +15,8 @@ const Register = () => {
         navigate('/admin/dashboard', { replace: true });
       } else if (user?.role === 'student') {
         navigate('/student/dashboard', { replace: true });
+      } else if (user?.role === 'faculty') {
+        navigate('/teacher/dashboard', { replace: true });
       } else {
         navigate('/admin/dashboard', { replace: true }); // Default fallback
       }
@@ -28,6 +30,8 @@ const Register = () => {
       navigate('/admin/dashboard', { replace: true });
     } else if (role === 'student') {
       navigate('/student/dashboard', { replace: true });
+    } else if (role === 'faculty') {
+      navigate('/teacher/dashboard', { replace: true });
     } else {
       navigate('/admin/dashboard', { replace: true }); // Default fallback
     }

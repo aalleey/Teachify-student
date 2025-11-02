@@ -1,9 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { pastPapersAPI } from '../services/api';
+import { useAuth } from '../contexts/AuthContext';
 
 const PastPaperUploadForm = ({ onClose, onSuccess, editingPaper = null }) => {
+  const { user } = useAuth();
   const [formData, setFormData] = useState({
-    subject: editingPaper?.subject || '',
+    subject: editingPaper?.subject || (user?.majorSubject || ''),
     title: editingPaper?.title || '',
     year: editingPaper?.year || new Date().getFullYear(),
     description: editingPaper?.description || ''
@@ -11,6 +13,13 @@ const PastPaperUploadForm = ({ onClose, onSuccess, editingPaper = null }) => {
   const [file, setFile] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  
+  // Auto-set subject for teachers
+  useEffect(() => {
+    if (user?.role === 'faculty' && user?.majorSubject && !editingPaper) {
+      setFormData(prev => ({ ...prev, subject: user.majorSubject }));
+    }
+  }, [user, editingPaper]);
 
   const subjects = [
     'Mathematics',
@@ -164,13 +173,19 @@ const PastPaperUploadForm = ({ onClose, onSuccess, editingPaper = null }) => {
               value={formData.subject}
               onChange={handleChange}
               required
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-[#0d0d0d] text-gray-900 dark:text-gray-100"
+              disabled={user?.role === 'faculty' && user?.majorSubject}
+              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-[#0d0d0d] text-gray-900 dark:text-gray-100 disabled:bg-gray-100 dark:disabled:bg-gray-800 disabled:cursor-not-allowed"
             >
               <option value="">Select Subject</option>
               {subjects.map((subject) => (
                 <option key={subject} value={subject}>{subject}</option>
               ))}
             </select>
+            {user?.role === 'faculty' && user?.majorSubject && (
+              <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                Your major subject is locked to: {user.majorSubject}
+              </p>
+            )}
           </div>
 
           <div>

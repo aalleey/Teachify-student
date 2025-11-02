@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import Navbar from './components/Navbar';
+import Footer from './components/Footer';
 import Home from './pages/Home';
 import About from './pages/About';
 import Contact from './pages/Contact';
@@ -11,6 +12,8 @@ import Register from './pages/Register';
 import AdminDashboard from './pages/AdminDashboard';
 import StudentDashboard from './pages/StudentDashboard';
 import TeacherDashboard from './pages/TeacherDashboard';
+import PracticeMCQs from './pages/PracticeMCQs';
+import Leaderboard from './pages/Leaderboard';
 import ProtectedRoute from './components/ProtectedRoute';
 import PublicRoute from './components/PublicRoute';
 import api from './services/api';
@@ -38,9 +41,10 @@ function App() {
   return (
     <AuthProvider>
       <Router>
-        <div className="min-h-screen bg-gray-50 dark:bg-[#000000] transition-colors duration-300">
+        <div className="min-h-screen bg-gray-50 dark:bg-[#000000] transition-colors duration-300 flex flex-col">
           <Navbar />
-          <Routes>
+          <main className="flex-1 pt-16 lg:pt-20">
+            <Routes>
             {/* Public Routes - Only accessible when NOT logged in */}
             <Route 
               path="/" 
@@ -102,10 +106,24 @@ function App() {
                 </ProtectedRoute>
               } 
             />
+            <Route 
+              path="/practice-mcqs" 
+              element={
+                <ProtectedRoute role="student">
+                  <PracticeMCQs />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/leaderboard" 
+              element={<Leaderboard />} 
+            />
             
             {/* Catch all - redirect to home (or login if authenticated) */}
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
+          </main>
+          <Footer />
         </div>
       </Router>
     </AuthProvider>

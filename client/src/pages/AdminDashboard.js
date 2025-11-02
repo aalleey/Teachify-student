@@ -4,6 +4,9 @@ import AnnouncementForm from '../components/AnnouncementForm';
 import FacultyForm from '../components/FacultyForm';
 import SyllabusUploadForm from '../components/SyllabusUploadForm';
 import PastPapersSection from '../components/PastPapersSection';
+import TeacherMCQsManagement from '../components/TeacherMCQsManagement';
+import UserManagement from '../components/UserManagement';
+import MessageSummary from '../components/MessageSummary';
 import { 
   syllabusAPI, 
   notesAPI, 
@@ -134,10 +137,14 @@ const AdminDashboard = () => {
 
   const tabs = [
     { id: 'overview', name: 'Overview', icon: '📊' },
+    { id: 'users', name: 'Users', icon: '👥' },
+    { id: 'mcqs', name: 'MCQs', icon: '❓' },
     { id: 'syllabus', name: 'Syllabus', icon: '📚' },
     { id: 'announcements', name: 'Announcements', icon: '📢' },
     { id: 'calendar', name: 'Calendar', icon: '📅' },
-    { id: 'faculty', name: 'Faculty', icon: '👥' }
+    { id: 'faculty', name: 'Faculty', icon: '👨‍🏫' },
+    { id: 'analytics', name: 'Analytics', icon: '📈' },
+    { id: 'messages', name: 'Messages', icon: '💬' }
   ];
 
   return (
@@ -191,16 +198,16 @@ const AdminDashboard = () => {
       )}
 
       {/* Tab Navigation */}
-      <div className="border-b border-gray-200 mb-8">
-        <nav className="-mb-px flex space-x-8">
+      <div className="border-b border-gray-200 dark:border-gray-800 mb-8">
+        <nav className="-mb-px flex space-x-8 overflow-x-auto">
           {tabs.map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`py-2 px-1 border-b-2 font-medium text-sm ${
+              className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors duration-200 whitespace-nowrap ${
                 activeTab === tab.id
-                  ? 'border-primary-500 text-primary-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  ? 'border-primary-500 text-primary-600 dark:text-primary-400'
+                  : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-700'
               }`}
             >
               <span className="mr-2">{tab.icon}</span>
@@ -380,6 +387,29 @@ const AdminDashboard = () => {
               Calendar management interface will be implemented here
             </div>
           </Card>
+        )}
+
+        {activeTab === 'mcqs' && (
+          <TeacherMCQsManagement />
+        )}
+
+        {activeTab === 'users' && (
+          <UserManagement />
+        )}
+
+        {activeTab === 'analytics' && (
+          <Card>
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-6">
+              Quiz Analytics
+            </h2>
+            <p className="text-gray-600 dark:text-gray-400">
+              Analytics dashboard coming soon...
+            </p>
+          </Card>
+        )}
+
+        {activeTab === 'messages' && (
+          <MessageSummary />
         )}
 
         {activeTab === 'faculty' && (

@@ -8,10 +8,33 @@ const upload = require('../middleware/upload');
 const router = express.Router();
 
 // Get all syllabus
-router.get('/', async (req, res) => {
+// For teachers, automatically filter by their majorSubject if not specified
+router.get('/', async (req, res, next) => {
+  // Make auth optional - if token exists, verify it and attach user
   try {
-    const { department, semester } = req.query;
+    const token = req.header('Authorization')?.replace('Bearer ', '');
+    if (token) {
+      const jwt = require('jsonwebtoken');
+      const User = require('../models/User');
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      req.user = await User.findById(decoded.id).select('-password');
+    }
+  } catch (error) {
+    // If token is invalid, just continue without user
+    req.user = null;
+  }
+  next();
+}, async (req, res) => {
+  try {
+    const { department, semester, subject } = req.query;
     let filter = {};
+    
+    // If user is a teacher, filter by their majorSubject unless subject is explicitly provided
+    if (req.user && req.user.role === 'faculty' && req.user.majorSubject && !subject) {
+      filter.subject = req.user.majorSubject;
+    } else if (subject) {
+      filter.subject = subject;
+    }
     
     if (department) filter.department = department;
     if (semester) filter.semester = semester;

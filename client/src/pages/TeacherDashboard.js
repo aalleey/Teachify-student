@@ -4,6 +4,8 @@ import Card from '../components/Card';
 import PastPaperUploadForm from '../components/PastPaperUploadForm';
 import PastPaperCard from '../components/PastPaperCard';
 import PastPaperViewer from '../components/PastPaperViewer';
+import TeacherMCQsManagement from '../components/TeacherMCQsManagement';
+import Messages from '../components/Messages';
 import { pastPapersAPI } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -19,8 +21,10 @@ const TeacherDashboard = () => {
 
   const tabs = [
     { id: 'overview', name: 'Overview', icon: '📊' },
+    { id: 'mcqs', name: 'MCQs Management', icon: '❓' },
     { id: 'upload', name: 'Upload Papers', icon: '📤' },
     { id: 'myPapers', name: 'My Uploads', icon: '📁' },
+    { id: 'messages', name: 'Messages', icon: '💬' },
   ];
 
   useEffect(() => {
@@ -177,6 +181,11 @@ const TeacherDashboard = () => {
             </div>
           )}
 
+          {/* MCQs Tab */}
+          {activeTab === 'mcqs' && (
+            <TeacherMCQsManagement />
+          )}
+
           {/* Upload Tab */}
           {activeTab === 'upload' && (
             <div>
@@ -271,6 +280,11 @@ const TeacherDashboard = () => {
                 </div>
               )}
             </div>
+          )}
+
+          {/* Messages Tab */}
+          {activeTab === 'messages' && (
+            <Messages userRole="faculty" />
           )}
         </div>
 
