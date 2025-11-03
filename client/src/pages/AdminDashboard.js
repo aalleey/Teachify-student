@@ -7,7 +7,7 @@ import PastPapersSection from '../components/PastPapersSection';
 import TeacherMCQsManagement from '../components/TeacherMCQsManagement';
 import UserManagement from '../components/UserManagement';
 import MessageSummary from '../components/MessageSummary';
-import { 
+import api, { 
   syllabusAPI, 
   notesAPI, 
   announcementsAPI, 
@@ -87,6 +87,14 @@ const AdminDashboard = () => {
     } catch (error) {
       console.error('Error fetching syllabus:', error);
     }
+  };
+
+  const resolveUrl = (url) => {
+    if (!url) return '';
+    if (url.startsWith('http://') || url.startsWith('https://')) return url;
+    const base = api.defaults.baseURL || '';
+    const serverOrigin = base.endsWith('/api') ? base.replace(/\/api$/, '') : base;
+    return `${serverOrigin}${url}`;
   };
 
   const handleEditAnnouncement = (announcement) => {
@@ -303,7 +311,7 @@ const AdminDashboard = () => {
                       </div>
                       <div className="flex space-x-2">
                         <a
-                          href={`http://192.168.100.75:5000${item.fileUrl}`}
+                          href={resolveUrl(item.fileUrl)}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="btn-secondary text-sm"

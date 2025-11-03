@@ -69,7 +69,8 @@ router.post('/register', [
         role: user.role,
         isApproved: user.isApproved,
         isBlocked: user.isBlocked,
-        majorSubject: user.majorSubject || undefined
+        majorSubject: user.majorSubject || undefined,
+        profileImage: user.profileImage || undefined
       }
     });
   } catch (error) {
@@ -130,7 +131,8 @@ router.post('/login', [
         role: user.role,
         isApproved: user.isApproved,
         isBlocked: user.isBlocked,
-        majorSubject: user.majorSubject || undefined
+        majorSubject: user.majorSubject || undefined,
+        profileImage: user.profileImage || undefined
       }
     });
   } catch (error) {
@@ -164,7 +166,8 @@ router.get('/me', auth, async (req, res) => {
         role: freshUser.role,
         isApproved: freshUser.isApproved,
         isBlocked: freshUser.isBlocked,
-        majorSubject: freshUser.majorSubject || undefined
+        majorSubject: freshUser.majorSubject || undefined,
+        profileImage: freshUser.profileImage || undefined
       }
     });
   } catch (error) {

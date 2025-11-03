@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { syllabusAPI } from '../services/api';
+import api, { syllabusAPI } from '../services/api';
 
 const SyllabusViewer = () => {
   const [syllabus, setSyllabus] = useState([]);
@@ -82,12 +82,20 @@ const SyllabusViewer = () => {
     setShowPreview(true);
   };
 
+  const resolveUrl = (url) => {
+    if (!url) return '';
+    if (url.startsWith('http://') || url.startsWith('https://')) return url;
+    const base = api.defaults.baseURL || '';
+    const serverOrigin = base.endsWith('/api') ? base.replace(/\/api$/, '') : base;
+    return `${serverOrigin}${url}`;
+  };
+
   const handleDownloadFile = async (syllabusItem) => {
     setDownloading(true);
     console.log('Starting download for:', syllabusItem);
     
     try {
-      const fileUrl = `http://192.168.100.75:5000${syllabusItem.fileUrl}`;
+      const fileUrl = resolveUrl(syllabusItem.fileUrl);
       const fileName = syllabusItem.originalFileName || `${syllabusItem.subject}.pdf`;
       
       console.log('File URL:', fileUrl);
@@ -136,7 +144,7 @@ const SyllabusViewer = () => {
       console.error('Download error:', error);
       // Fallback: open in new tab
       console.log('Opening in new tab as fallback...');
-      window.open(`http://192.168.100.75:5000${syllabusItem.fileUrl}`, '_blank');
+      window.open(resolveUrl(syllabusItem.fileUrl), '_blank');
     } finally {
       setDownloading(false);
     }
@@ -303,7 +311,7 @@ const SyllabusViewer = () => {
             <div className="border rounded-lg p-4 mb-4">
               {selectedFile.fileType?.includes('image') ? (
                 <img
-                  src={`http://192.168.100.75:5000${selectedFile.fileUrl}`}
+                  src={resolveUrl(selectedFile.fileUrl)}
                   alt={selectedFile.subject}
                   className="max-w-full max-h-96 mx-auto"
                 />
@@ -329,7 +337,7 @@ const SyllabusViewer = () => {
                 {downloading ? 'Downloading...' : 'Download File'}
               </button>
               <button
-                onClick={() => window.open(`http://192.168.100.75:5000${selectedFile.fileUrl}`, '_blank')}
+                onClick={() => window.open(resolveUrl(selectedFile.fileUrl), '_blank')}
                 className="flex-1 btn-secondary"
               >
                 Open in New Tab

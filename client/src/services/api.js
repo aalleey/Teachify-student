@@ -174,6 +174,13 @@ export const usersAPI = {
   unblock: (id) => api.patch(`/users/${id}/unblock`),
   reject: (id) => api.patch(`/users/${id}/reject`),
   delete: (id) => api.delete(`/users/${id}`),
+  // Profile image management (any authenticated user)
+  uploadProfileImage: (imageFile) => {
+    const formData = new FormData();
+    formData.append('image', imageFile);
+    return api.post('/users/profile-image', formData);
+  },
+  deleteProfileImage: () => api.delete('/users/profile-image'),
 };
 
 // Messages API

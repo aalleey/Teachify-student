@@ -68,7 +68,15 @@ const userSchema = new mongoose.Schema({
       type: Date,
       default: Date.now
     }
-  }]
+  }],
+  profileImage: {
+    type: String,
+    trim: true
+  },
+  cloudinaryPublicId: {
+    type: String,
+    trim: true
+  }
 }, {
   timestamps: true
 });

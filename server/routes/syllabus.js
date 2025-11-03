@@ -3,7 +3,8 @@ const { body, validationResult } = require('express-validator');
 const path = require('path');
 const Syllabus = require('../models/Syllabus');
 const { auth, adminAuth } = require('../middleware/auth');
-const upload = require('../middleware/upload');
+const { uploadSyllabus } = require('../middleware/uploadCloudinary');
+const { uploadToCloudinary, deleteFromCloudinary, getPublicIdFromUrl } = require('../utils/cloudinary');
 
 const router = express.Router();
 
@@ -62,7 +63,7 @@ router.get('/:id', async (req, res) => {
 });
 
 // Create syllabus (Admin only)
-router.post('/', auth, adminAuth, upload.single('file'), [
+router.post('/', auth, adminAuth, uploadSyllabus.single('file'), [
   body('department').notEmpty().withMessage('Department is required'),
   body('semester').notEmpty().withMessage('Semester is required'),
   body('subject').notEmpty().withMessage('Subject is required')
@@ -79,8 +80,18 @@ router.post('/', auth, adminAuth, upload.single('file'), [
 
     const { department, semester, subject, description } = req.body;
     
-    // Create file URL
-    const fileUrl = `/uploads/syllabus/${req.file.filename}`;
+    // Upload file to Cloudinary
+    const cloudinaryResult = await uploadToCloudinary(
+      req.file.buffer,
+      'teachify/syllabus',
+      {
+        public_id: `syllabus-${Date.now()}-${Math.round(Math.random() * 1E9)}`,
+        resource_type: 'auto'
+      }
+    );
+    
+    // Use Cloudinary URL
+    const fileUrl = cloudinaryResult.secure_url;
     
     const syllabus = new Syllabus({
       department,
@@ -91,14 +102,15 @@ router.post('/', auth, adminAuth, upload.single('file'), [
       uploadedBy: req.user._id,
       originalFileName: req.file.originalname,
       fileSize: req.file.size,
-      fileType: req.file.mimetype
+      fileType: req.file.mimetype,
+      cloudinaryPublicId: cloudinaryResult.public_id // Store public ID for future deletion
     });
 
     await syllabus.save();
     res.status(201).json(syllabus);
   } catch (error) {
     console.error('Create syllabus error:', error);
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: 'Server error', error: error.message });
   }
 });
 
@@ -127,10 +139,32 @@ router.put('/:id', auth, adminAuth, async (req, res) => {
 // Delete syllabus (Admin only)
 router.delete('/:id', auth, adminAuth, async (req, res) => {
   try {
-    const syllabus = await Syllabus.findByIdAndDelete(req.params.id);
+    const syllabus = await Syllabus.findById(req.params.id);
     if (!syllabus) {
       return res.status(404).json({ message: 'Syllabus not found' });
     }
+
+    // Delete file from Cloudinary if public ID exists
+    if (syllabus.cloudinaryPublicId) {
+      try {
+        await deleteFromCloudinary(syllabus.cloudinaryPublicId, 'auto');
+      } catch (cloudinaryError) {
+        console.error('Error deleting from Cloudinary:', cloudinaryError);
+        // Continue with database deletion even if Cloudinary deletion fails
+      }
+    } else if (syllabus.fileUrl) {
+      // Fallback: Try to extract public ID from URL
+      const publicId = getPublicIdFromUrl(syllabus.fileUrl);
+      if (publicId) {
+        try {
+          await deleteFromCloudinary(publicId, 'auto');
+        } catch (cloudinaryError) {
+          console.error('Error deleting from Cloudinary:', cloudinaryError);
+        }
+      }
+    }
+
+    await Syllabus.findByIdAndDelete(req.params.id);
     res.json({ message: 'Syllabus deleted successfully' });
   } catch (error) {
     console.error('Delete syllabus error:', error);

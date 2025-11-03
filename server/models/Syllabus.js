@@ -39,6 +39,10 @@ const syllabusSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
     required: true
+  },
+  cloudinaryPublicId: {
+    type: String,
+    trim: true
   }
 }, {
   timestamps: true

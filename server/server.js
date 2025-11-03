@@ -21,6 +21,7 @@ app.use(cors({
     'https://teachify-student-git-main.vercel.app',
     /\.vercel\.app$/,
     /\.railway\.app$/,
+    /\.onrender\.com$/,
     /\.ngrok\.io$/,
     /\.ngrok-free\.app$/
   ],
